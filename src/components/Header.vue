@@ -8,17 +8,26 @@ const store = useStore()
 
 const osThemeRef = useOsTheme()
 
+const applyDarkClass = (enabled) => {
+    document.documentElement.classList.toggle('dark', enabled)
+}
+
 onMounted(() => {
-    store.dispatch('switchDarkMode', osThemeRef.value === 'dark')
+    const shouldUseDark = osThemeRef.value === 'dark'
+    store.dispatch('switchDarkMode', shouldUseDark)
+    applyDarkClass(shouldUseDark)
 })
 
 watch(osThemeRef, (newTheme) => {
-    store.dispatch('switchDarkMode', newTheme === 'dark')
+    const shouldUseDark = newTheme === 'dark'
+    store.dispatch('switchDarkMode', shouldUseDark)
+    applyDarkClass(shouldUseDark)
 })
 
 const switchMode = () => {
-    store.dispatch('switchDarkMode', !store.state.isDarkMode)
-    console.log(store.state.isDarkMode)
+    const toggled = !store.state.isDarkMode
+    store.dispatch('switchDarkMode', toggled)
+    applyDarkClass(toggled)
 }
 
 
@@ -49,8 +58,8 @@ const menuOptionsGap = computed(() => {
     <n-layout-header>
         <n-flex justify="space-between" class="header-container">
             <n-flex v-show="windowWidth > 768">
-                <img src="/bssIcon.png" class="bss-icon">
-                <div>Bangumi Rec</div>
+                <img src="/bgm-rec-star.svg" class="bss-icon">
+                <div>Bangumi Match</div>
             </n-flex>
 
             <n-flex justify="center" :size="menuOptionsGap">
@@ -61,7 +70,7 @@ const menuOptionsGap = computed(() => {
             </n-flex>
 
             <n-flex justify="end">
-                <n-button text class="mode-icon" @click="switchMode" color="#FFFFFF">
+                <n-button text class="mode-icon" @click="switchMode" @mouseup="e => e.currentTarget.blur()">
                     <n-icon v-show="store.state.isDarkMode">
                         <svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink"
                             viewBox="0 0 24 24">
@@ -82,7 +91,14 @@ const menuOptionsGap = computed(() => {
                 </n-button>
 
                 <a href="https://github.com/AcuLY/BangumiStaffStats" target="_blank" class="header-items">
-                    <img src="/github.png" alt="Github">
+                    <svg t="1743927261682" class="icon" viewBox="0 0 1024 1024" version="1.1" xmlns="http://www.w3.org/2000/svg" p-id="2612" width="40" height="40">
+                        <path 
+                            d="M512 42.666667A464.64 464.64 0 0 0 42.666667 502.186667 460.373333 460.373333 0 0 0 363.52 938.666667c23.466667 4.266667 32-9.813333 32-22.186667v-78.08c-130.56 27.733333-158.293333-61.44-158.293333-61.44a122.026667 122.026667 0 0 0-52.053334-67.413333c-42.666667-28.16 3.413333-27.733333 3.413334-27.733334a98.56 98.56 0 0 1 71.68 47.36 101.12 101.12 0 0 0 136.533333 37.973334 99.413333 99.413333 0 0 1 29.866667-61.44c-104.106667-11.52-213.333333-50.773333-213.333334-226.986667a177.066667 177.066667 0 0 1 47.36-124.16 161.28 161.28 0 0 1 4.693334-121.173333s39.68-12.373333 128 46.933333a455.68 455.68 0 0 1 234.666666 0c89.6-59.306667 128-46.933333 128-46.933333a161.28 161.28 0 0 1 4.693334 121.173333A177.066667 177.066667 0 0 1 810.666667 477.866667c0 176.64-110.08 215.466667-213.333334 226.986666a106.666667 106.666667 0 0 1 32 85.333334v125.866666c0 14.933333 8.533333 26.88 32 22.186667A460.8 460.8 0 0 0 981.333333 502.186667 464.64 464.64 0 0 0 512 42.666667" 
+                            p-id="2613"
+                            fill="currentColor"
+                        >
+                        </path>
+                    </svg>
                 </a>
             </n-flex>
         </n-flex>
@@ -92,13 +108,13 @@ const menuOptionsGap = computed(() => {
 <style scoped>
 .header-container {
     padding: 20px 20px 20px 20px;
-    background-color: #191919;
+    color: var(--color-titlebar);
+    background-color: var(--color-titlebar-background);
     border-style: solid none none none;
-    border-color: #ff5b9a;
+    border-color: var(--nord8);
     border-width: 5px;
     font-size: 24px;
     font-weight: bold;
-    color: rgb(255, 255, 255);
     user-select: none;
 }
 
@@ -112,13 +128,13 @@ const menuOptionsGap = computed(() => {
     position: relative;
     display: inline-block;
     cursor: pointer;
-    color: white;
+    color: var(--color-titlebar);
     transition: color 0.2s ease;
 }
 
 .menu-option:hover,
 .menu-option.active {
-    color: #ff5b9a;
+    color: var(--nord8);
 }
 
 .menu-option::after {
@@ -135,30 +151,35 @@ const menuOptionsGap = computed(() => {
 
 .menu-option:hover::after,
 .menu-option.active::after {
-    color: #ff5b9a;
+    color: var(--nord8);
     width: 100%;
 }
 
 .mode-icon {
-    color: white;
     font-size: 40px;
+    color: var(--color-titlebar);
+    transition: color 0.2s ease;
 }
 
 .mode-icon:hover {
-    color: #ff5b9a;
+    color: var(--nord8);
 }
 
 .header-items {
-    color: white;
     text-decoration: none;
 }
 
-.header-items img {
+.header-items svg {
     width: 40px;
     margin: -10px 0 -10px 0;
-    transform: translateY(2px);
+    transform: translateY(1px);
+    color: var(--color-titlebar);
+    transition: color 0.2s ease;
 }
 
+.header-items:hover svg {
+    color: var(--nord8);
+}
 
 @media (max-width: 768px) {
     .header-container {
