@@ -12,7 +12,7 @@ const nameCNFontSize = computed(() => getOptimalFontSize(props.info?.nameCN, 260
 
 const openSubjectPage = () => {
     if (props.info) {
-        window.open(BANGUMI_SUBJECT + props.info.id, '_blank')
+        window.open(BANGUMI_SUBJECT(props.info.id) , '_blank')
     }
 }
 </script>

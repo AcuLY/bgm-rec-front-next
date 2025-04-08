@@ -113,7 +113,7 @@ for (let i = 0; i < 20; i++) {
                             <AnimeCompact @click="fillIdBySearchResult(anime.id)" :name="anime.name"
                                 :nameCN="anime.name_cn" :image="anime.images?.large || ''" />
                         </template>
-                        <a :href="BANGUMI_SUBJECT + String(anime.id)" target="_blank" style="text-underline-offset: 3px;">{{ anime.name }}</a>
+                        <a :href="BANGUMI_SUBJECT (String(anime.id))" target="_blank" style="text-underline-offset: 3px;">{{ anime.name }}</a>
                     </n-tooltip>
                 </div>
             </n-flex>
