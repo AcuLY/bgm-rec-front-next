@@ -1,9 +1,23 @@
-export const BANGUMI_SUBJECT_API = 'https://api.bgm.tv/v0/subjects'
+import {
+  BANGUMI_SUBJECT_API,
+  BANGUMI_SEARCH_API,
+  BANGUMI_SUBJECT,
+  API_ANIME_SIM,
+  API_USER_REC
+} from "../../config/api.js";
 
-export const BANGUMI_SEARCH_API = 'https://api.bgm.tv/search/subject'
+const isMockMode = process.env.mode === 'mock';
 
-export const BGMREC_API = 'http://127.0.0.1:3000/api/anime'
+// BASE URLs
+export const BASE_PRODUCE = `${window.location.origin}`;
+export const BASE_MOCK = 'http://127.0.0.1:3000'
+export const BASE_API_URL = isMockMode ? BASE_MOCK : BASE_PRODUCE
 
-export const SIMILAR_ANIME_API = BGMREC_API + '/sim'
+export const URL_ANIME_SIM = (id) => `${BASE_API_URL}${API_ANIME_SIM.replace(
+    ':id', id)}`;
 
-export const BANGUMI_SUBJECT = 'https://bgm.tv/subject/'
+export {
+  BANGUMI_SUBJECT_API,
+  BANGUMI_SEARCH_API,
+  BANGUMI_SUBJECT,
+};

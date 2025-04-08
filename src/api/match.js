@@ -1,9 +1,10 @@
 import axios from "axios";
-import { SIMILAR_ANIME_API } from "./_prefix";
+import {URL_ANIME_SIM} from "./_prefix.js";
+
 
 export const getSimilarAnime = async (id) => {
     try {
-        const url = SIMILAR_ANIME_API + `/${id}`
+        const url = URL_ANIME_SIM(id);
         const resp =  await axios.get(url)
         return resp.data
     } catch (error) {
