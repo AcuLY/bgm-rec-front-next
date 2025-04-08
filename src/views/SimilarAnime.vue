@@ -8,7 +8,14 @@ import Anime from '../components/Anime.vue'
 import { useNotification } from 'naive-ui'
 import { BANGUMI_SUBJECT } from '../api/_prefix'
 
+const isLoadingSearch = ref(false)
+const isLoadingInfo = ref(false)
+
 const notify = useNotification()
+const windowWidth = ref(window.innerWidth)
+onMounted(() => { window.addEventListener('resize', () => { windowWidth.value = window.innerWidth }) })
+const isMobile = computed(() => windowWidth.value <= 768)
+const mobileScaleRatio = computed(() => isMobile.value ? 0.787 : 1)
 
 const animeId = ref('')
 const animeName = ref('')
@@ -18,7 +25,16 @@ const animeKeyword = ref('')
 const keywordResults = ref([])
 
 const onKeywordInputChanged = debounce(async () => {
+    isLoadingSearch.value = true
     keywordResults.value = await searchAnimeByKeyword(animeKeyword.value)
+    isLoadingSearch.value = false
+
+    if (keywordResults.value.length == 0) {
+        notify.warning({
+            title: '无搜索结果！',
+            duration: 3000
+        })
+    }
 }, 500)
 
 watch(animeKeyword, () => {
@@ -31,63 +47,90 @@ const fillIdBySearchResult = (id) => {
 }
 
 const similarAnimeIds = ref([])
+const similarAnimeSimilarities = ref([])
 const similarAnimeInfos = ref([])
 
 const onIdInputChanged = debounce(async () => {
     try {
-        similarAnimeIds.value = await getSimilarAnime(animeId.value)
+        isLoadingInfo.value = true
+        curAnimeInfoIndex = 0
+        similarAnimeIds.value = []
+        similarAnimeInfos.value = []
+
+        const idsAndSimilarities = await getSimilarAnime(animeId.value)
+        similarAnimeIds.value = idsAndSimilarities.map(item => item['id'])
+        similarAnimeSimilarities.value = idsAndSimilarities.map(item => (Number(item['score']) * 10).toFixed(2))
 
         getAnimeInfo(animeId.value).then(res => {
             animeName.value = res.name
         })
 
-        similarAnimeInfos.value = await Promise.all(similarAnimeIds.value.map(id => getAnimeInfo(id)))
-        console.log(similarAnimeInfos.value)
+        await getTwentyAnimeInfos()
+
+        isLoadingInfo.value = false
     } catch (error) {
         notify.error({
             title: error.message,
             duration: 3000
         })
+
+        curAnimeInfoIndex = 0
+        similarAnimeIds.value = []
+        similarAnimeInfos.value = []
+        isLoadingInfo.value = false
     }
 }, 500)
+
+let curAnimeInfoIndex = 0;
+const getTwentyAnimeInfos = async () => {
+    if (curAnimeInfoIndex >= similarAnimeIds.value.length) {
+        return;
+    }
+
+    similarAnimeInfos.value = similarAnimeInfos.value.filter(item => Object.keys(item).length > 0);
+
+    const nextIds = similarAnimeIds.value.slice(curAnimeInfoIndex, curAnimeInfoIndex + 20);
+    const newAnimeInfos = await Promise.all(nextIds.map(id => getAnimeInfo(id)));
+
+    newAnimeInfos.forEach((info, i) => {
+        info.similarity = similarAnimeSimilarities.value[curAnimeInfoIndex + i];
+    });
+
+    const updatedList = [...similarAnimeInfos.value, ...newAnimeInfos];
+
+    curAnimeInfoIndex += 20;
+
+    if (curAnimeInfoIndex < similarAnimeIds.value.length) {
+        updatedList.push({});
+    }
+
+    similarAnimeInfos.value = updatedList;
+}
 
 watch(animeId, () => {
     onIdInputChanged()
 })
 
-const utility = {
-    id: 110568,
-    name: '空色ユーティリティ',
-    nameCN: '一杆青空',
-    image: 'https://lain.bgm.tv/r/400/pic/cover/l/ea/c4/479788_mcfeN.jpg',
-    summary: '「再这样下去，就只能作为普通的村民A毕业了！」青羽美波有一个烦恼，那就是她没有任何专长或是想做的事。美好的女子高中生活，真的要以路人角色结束了吗！ ？美波从学校飞奔而出，寻找属于自己的「Special」。碰巧来到了附近的高尔夫练习场，并在工读生茜遥的搭话下，握起了高尔夫球杆―――「Utility」。这就是美波与高尔夫的相遇。高尔夫不是只有挥杆和获胜！而是一切都很有趣！与天才高尔夫球手―――遥，以及想当网红的星美彩花一起。为了寻求自己成为「主角」的瞬间，超级初学者―――美波，今天也举起了球杆！',
-    tags: ['TV', '日本', '原创', '运动'],
-    date: '2025-1-3',
-    score: '6.7',
-    total: 1001,
-    similarity: 8
-}
-for (let i = 0; i < 20; i++) {
-    similarAnimeInfos.value.push({...utility});
-}
+const emptyAnimeList = Array.from({ length: 20 }, () => ({}));
 </script>
 
 <template>
     <n-layout-content class="similar-anime-container">
         <n-collapse-transition class="outer-container" :show="!searchByKeywordOn">
-            <n-flex justify="center" :size="20">
-                <span class="input-title">动画 id</span>
-                <n-input class="input" v-model:value="animeId" placeholder="请输入动画在 Bangumi 的条目 id" />
+            <n-flex justify="center" :size="20 * mobileScaleRatio">
+                <span class="input-title">动画 ID</span>
+                <n-input class="input" :loading="isLoadingInfo" v-model:value="animeId"
+                    placeholder="请输入动画在 Bangumi 的 ID" />
             </n-flex>
         </n-collapse-transition>
 
-        <n-flex class="outer-container" justify="center" :size="20">
+        <n-flex class="outer-container" justify="center" :size="20 * mobileScaleRatio">
             <n-tooltip trigger="hover">
                 <template #trigger>
                     <span class="hint-text">不知道动画的 id ?</span>
                 </template>
-                在 <a href="https://bgm.tv" target="_blank">Bangumi</a> 点开一个动画页面，链接中最后一段的数字就是 id。<br />
-                如 <a href="https://bgm.tv/subject/501702" target="_blank">https://bgm.tv/subject/501702</a> 的 id 是
+                在 <a href="https://bgm.tv" target="_blank">Bangumi</a> 点开一个动画页面，<br />链接中最后一段的数字就是 id。<br />
+                如 <a href="https://bgm.tv/subject/501702" target="_blank">https://bgm.tv/subject/501702</a><br /> 的 id 是
                 501702。
             </n-tooltip>
 
@@ -100,11 +143,12 @@ for (let i = 0; i < 20; i++) {
         <n-collapse-transition class="outer-container" :show="searchByKeywordOn">
             <n-flex justify="center">
                 <span class="input-title">动画名关键字</span>
-                <n-input class="input" v-model:value="animeKeyword" placeholder="请输入动画名称关键字（中文日文均可）" />
+                <n-input class="input" :loading="isLoadingSearch"
+                    v-model:value="animeKeyword" placeholder="请输入动画名（中文或日文）" />
             </n-flex>
 
             <n-divider v-show="keywordResults.length"><span
-                    :style="{color: 'var(--color-hint)', fontWeight: 'bold'}">搜索结果</span></n-divider>
+                    :style="{ color: 'var(--color-hint)', fontWeight: 'bold' }">搜索结果</span></n-divider>
 
             <n-flex class="search-result-container" justify="flex-start">
                 <div v-for="anime in keywordResults" :key="anime.id">
@@ -120,19 +164,29 @@ for (let i = 0; i < 20; i++) {
         </n-collapse-transition>
 
         <n-divider>
-            <n-flex class="similar-anime-title-container" justify="center" size="small"
-                v-show="similarAnimeIds.length >= 1">
-                <span style="color: #88C0D0; font-size: 28px;">{{ animeName }}</span>
-                <span>的相似动画</span>
+            <n-flex class="similar-anime-title-container" justify="center" size="small">
+                <template v-if="isLoadingInfo">
+                    <n-skeleton style="border-radius: 4px;" :width="160 * mobileScaleRatio"
+                        :height="36 * mobileScaleRatio" />
+                    <span>的相似动画</span>
+                </template>
+                <template v-else-if="similarAnimeInfos.length >= 1">
+                    <a :href="BANGUMI_SUBJECT + animeId" target="_blank" style="text-decoration: none;">
+                        <span class="origin-anime-name">{{ animeName }}</span>
+                    </a>
+                    <span>的相似动画</span>
+                </template>
             </n-flex>
         </n-divider>
 
-        <n-flex justify="center" :size="20" v-show="similarAnimeInfos.length >= 1">
-            <div v-for="(anime, index) in similarAnimeInfos" :key="index">
-                <Anime :info="anime" />
-            </div>
-        </n-flex>
 
+        <n-infinite-scroll :distance="10" @load="getTwentyAnimeInfos">
+            <n-flex class="similar-anime-info-container" justify="center" :size="12">
+                <div v-for="(anime, index) in isLoadingInfo ? emptyAnimeList : similarAnimeInfos" :key="index">
+                    <Anime :info="anime" similarity />
+                </div>
+            </n-flex>
+        </n-infinite-scroll>
 
     </n-layout-content>
 
@@ -176,6 +230,8 @@ for (let i = 0; i < 20; i++) {
     border: 1px dashed transparent;
     border-radius: 6px;
     transition: border-color 0.5s;
+    text-decoration: underline;
+    text-underline-offset: 4px;
 }
 
 .hint-text:hover {
@@ -193,12 +249,61 @@ for (let i = 0; i < 20; i++) {
     height: 480px;
     padding: 12px;
     overflow-y: scroll;
-
 }
 
 .similar-anime-title-container {
     max-width: 90vw;
-    font-size: 24px;
+    font-size: 22px;
     font-weight: bold;
+}
+
+.origin-anime-name {
+    color: #88C0D0;
+    font-size: 28px;
+}
+
+.similar-anime-info-container {
+    height: calc(100vh - 80px);
+    padding: 12px 0 20px 0;
+}
+
+@media (max-width: 768px) {
+    .similar-anime-container {
+        height: calc(100vh - 85px);
+    }
+
+    .outer-container {
+        width: 100vw;
+        margin: 15px 0 0px 0;
+        padding: 0 15px 0 15px;
+    }
+
+    .input {
+        width: 240px;
+        height: 32px;
+    }
+
+    .input-title {
+        transform: translateY(2px);
+        font-size: 16px;
+    }
+
+    .search-result-container {
+        height: 378px;
+        padding: 0;
+    }
+
+    .similar-anime-title-container {
+        font-size: 16px;
+    }
+
+    .origin-anime-name {
+        font-size: 22px;
+    }
+
+    .similar-anime-info-container {
+        height: calc(100vh - 85px);
+        padding: 0 0 20px 0;
+    }
 }
 </style>

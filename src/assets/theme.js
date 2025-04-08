@@ -30,6 +30,7 @@ export const nordTheme = {
     },
     Divider: {
         color: getCssVar('--nord4'),
+        textColor: getCssVar('--nord3'),
     }
 };
 
@@ -52,5 +53,6 @@ export const nordDarkTheme = {
     },
     Divider: {
         color: getCssVar('--nord3'),
+        textColor: getCssVar('--nord6'),
     }
 }

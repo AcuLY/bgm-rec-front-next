@@ -4,11 +4,17 @@ import { computed } from 'vue';
 import { BANGUMI_SUBJECT } from '../api/_prefix';
 
 const props = defineProps({
-    info: Object
+    info: Object,
+    similarity: Boolean
 })
 
-const nameFontSize = computed(() => getOptimalFontSize(props.info?.name, 260, 52))
-const nameCNFontSize = computed(() => getOptimalFontSize(props.info?.nameCN, 260, 32))
+const windowWidth = ref(window.innerWidth)
+onMounted(() => { window.addEventListener('resize', () => { windowWidth.value = window.innerWidth }) })
+const isMobile = computed(() => windowWidth.value <= 768)
+const mobileScaleRatio = computed(() => isMobile.value ? 0.787 : 1)
+
+const nameFontSize = computed(() => getOptimalFontSize(props.info?.name, 260 * mobileScaleRatio.value, 52 * mobileScaleRatio.value, "bold"))
+const nameCNFontSize = computed(() => getOptimalFontSize(props.info?.nameCN, 260 * mobileScaleRatio.value, 32 * mobileScaleRatio.value, "medium"))
 
 const openSubjectPage = () => {
     if (props.info) {
@@ -26,11 +32,11 @@ const openSubjectPage = () => {
                     <div class="score-container">
                         <span class="total">{{ props.info.total }}人</span>
                         <span class="score">
-                            {{ props.info.score }}
-                            <img src="/star.png" style="width: 18px;">
+                            {{ Number(props.info.score).toFixed(1) }}
+                            <img src="/star.png">
                         </span>
                     </div>
-                    <n-image class="image" :src="props.info.image" width="128" />
+                    <n-image class="image" :src="props.info.image" :width="128 * mobileScaleRatio" />
                 </template>
                 <template v-else>
                     <n-skeleton class="image" />
@@ -43,14 +49,14 @@ const openSubjectPage = () => {
                         <span :style="{ fontSize: nameFontSize }" class="name">{{ props.info.name }}</span>
                     </template>
                     <template v-else>
-                        <n-skeleton style="border-radius: 6px;" height="52px"/>
+                        <n-skeleton style="border-radius: 6px;" :height="52 * mobileScaleRatio" />
                     </template>
 
                     <template v-if="props.info?.nameCN">
                         <span :style="{ fontSize: nameCNFontSize }" class="name-cn">{{ props.info.nameCN }}</span>
                     </template>
                     <template v-else>
-                        <n-skeleton style="border-radius: 6px;" height="32px"/>
+                        <n-skeleton style="border-radius: 6px;" :height="32 * mobileScaleRatio" />
                     </template>
                 </div>
 
@@ -60,7 +66,8 @@ const openSubjectPage = () => {
                             <span class="date">{{ props.info.date }}</span>
                         </template>
                         <template v-else>
-                            <n-skeleton style="border-radius: 4px;" width="100px" height="16px" />
+                            <n-skeleton style="border-radius: 4px;" :width="100 * mobileScaleRatio"
+                                :height="16 * mobileScaleRatio" />
                         </template>
                     </n-flex>
 
@@ -75,12 +82,12 @@ const openSubjectPage = () => {
                         <n-skeleton style="border-radius: 4px;" />
                     </template>
 
-                    <template v-if="props.info?.similarity">
+                    <template v-if="props.similarity && props.info?.similarity">
                         <a href="" class="similarity">
                             加权相似度：{{ props.info.similarity }} / 10
                         </a>
                     </template>
-                    <template v-else>
+                    <template v-else-if="props.similarity">
                         <n-skeleton style="border-radius: 4px;" />
                     </template>
                 </n-flex>
@@ -93,7 +100,7 @@ const openSubjectPage = () => {
                 {{ props.info.summary }}
             </template>
             <template v-else>
-                <n-skeleton style="border-radius: 4px;" text repeat="4" />
+                <n-skeleton style="border-radius: 4px;" text :repeat="4" />
             </template>
         </div>
     </n-flex>
@@ -153,6 +160,10 @@ const openSubjectPage = () => {
     font-weight: bold;
     color: var(--nord6);
     font-size: 24px;
+}
+
+.score img {
+    width: 18px;
 }
 
 .total {
@@ -217,5 +228,75 @@ const openSubjectPage = () => {
 
     overflow: hidden;
     text-overflow: ellipsis;
+}
+
+@media (max-width: 768px) {
+    .main-container {
+        width: 340px;
+        height: 246px;
+        border-radius: 8px;
+    }
+
+    .main-container:hover {
+        box-shadow: 0px 0px 6px #70bbd0;
+    }
+
+    .image-info-container {
+        width: 318px;
+        height: 156px;
+    }
+
+    .shade {
+        width: 101px;
+        height: 143px;
+        border-radius: 4px;
+    }
+
+    .score {
+        font-size: 19px;
+    }
+
+    .score img {
+        width: 14px;
+    }
+
+    .total {
+        font-size: 14px;
+    }
+
+    .image {
+        width: 101px;
+        height: 143px;
+        border-radius: 4px;
+    }
+
+    .info-container {
+        width: 205px;
+        padding-top: 14px;
+        gap: 5px;
+    }
+
+    .name-container {
+        width: 205px;
+        height: 71px;
+        gap: 5px;
+    }
+
+    .date {
+        font-size: 13px;
+    }
+
+    .tag {
+        font-size: 13px;
+    }
+
+    .similarity {
+        font-size: 13px;
+    }
+
+    .summary-container {
+        width: 318px;
+        font-size: 11px;
+    }
 }
 </style>

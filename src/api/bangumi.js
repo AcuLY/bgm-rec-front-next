@@ -1,14 +1,13 @@
 import axios from "axios";
 import { BANGUMI_SEARCH_API, BANGUMI_SUBJECT_API } from "./_prefix";
-import {BANGUMI_USER_COLLECTION} from "../../config/api.js";
+import { BANGUMI_USER_API, BANGUMI_USER_COLLECTION } from "../../config/api.js";
 
 
 const CACHE_EXPIRY = 24 * 60 * 60 * 1000; // 24 hours in milliseconds
 
 export const searchAnimeByKeyword = async(keyword, start=0) => {
     try {
-        const encodedKeyword = encodeURIComponent(keyword)
-        const resp = await axios.get(BANGUMI_SEARCH_API(encodedKeyword), {
+        const resp = await axios.get(BANGUMI_SEARCH_API(keyword), {
             params: {
                 type: 2,
                 responseGroup: 'small',
@@ -36,10 +35,25 @@ export const getAnimeInfo = async(id) => {
             tags: data.meta_tags,
             summary: data.summary,
             score: data.rating['score'],
+            total: data.rating['total'],
             date: data.date
         }
     } catch (error) {
         throw new Error('获取条目信息失败：' + error.message);
+    }
+}
+
+export const getUserInfo = async(username) => {
+    try {
+        const url = BANGUMI_USER_API(username)
+        const resp = await axios.get(url)
+        const data = resp.data
+        return {
+            id: data.id,
+            nickname: data.nickname
+        }
+    } catch (error) {
+        throw new Error('获取用户信息失败：' + error.message);
     }
 }
 

@@ -6,11 +6,15 @@ const props = defineProps({
     nameCN: String,
     image: String,
 })
+
+const windowWidth = ref(window.innerWidth)
+onMounted(() => { window.addEventListener('resize', () => { windowWidth.value = window.innerWidth }) })
+const isMobile = computed(() => windowWidth.value <= 768)
 </script>
 
 <template>
     <div class="anime-compact-container">
-        <n-image width="150" :src="props.image === '' ? '/no-image.png' : props.image" fallback-src="/no-image.png"/>
+        <n-image :width="isMobile ? 100 : 150" :src="props.image === '' ? '/no-image.png' : props.image" fallback-src="/no-image.png" />
         <div class="shade"></div>
         <n-flex class="anime-names-container" vertical>
             <span class="name-cn" v-show="props.nameCN != props.name">{{ props.nameCN }}</span>
@@ -40,7 +44,7 @@ const props = defineProps({
     height: 150px;
     width: 200px;
     opacity: 0.8;
-    background-image: linear-gradient(180deg, rgba(0,0,0,0.00) 0%, var(--nord2) 80%, var(--nord2) 100%);
+    background-image: linear-gradient(180deg, rgba(0, 0, 0, 0.00) 0%, var(--nord2) 80%, var(--nord2) 100%);
 }
 
 .anime-names-container {
@@ -73,5 +77,35 @@ const props = defineProps({
     width: 150px;
     height: 211px;
     object-fit: cover;
+}
+
+@media (max-width: 768px) {
+    .anime-compact-container {
+        width: 100px;
+        height: 140px;
+    }
+
+    .shade {
+        width: 100px;
+        height: 140px;
+        background-image: linear-gradient(180deg, rgba(0, 0, 0, 0.00) 0%, var(--nord2) 95%, var(--nord2) 100%);
+    }
+
+    .name-cn {
+        width: 90px;
+        margin: 0 6px -12px 6px;
+        font-size: 10px;
+    }
+
+    .name {
+        width: 95px;
+        margin: 2px 6px 2px 6px;
+        font-size: 12px;
+    }
+
+    .anime-compact-container img {
+        width: 100px;
+        height: 140px;
+    }
 }
 </style>
