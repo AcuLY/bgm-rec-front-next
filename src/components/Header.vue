@@ -98,7 +98,7 @@ const menuOptionsGap = computed(() => {
                         </n-icon>
                     </n-button>
 
-                    <a href="https://github.com/AcuLY/BangumiStaffStats" target="_blank" class="header-items">
+                    <a href="https://github.com/bangumi-match" target="_blank" class="header-items">
                         <svg t="1743927261682" class="icon" viewBox="0 0 1024 1024" version="1.1"
                             xmlns="http://www.w3.org/2000/svg" p-id="2612">
                             <path
