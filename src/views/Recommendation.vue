@@ -18,67 +18,69 @@ const userId = ref('')
 const userName = ref('')
 const userNickname = ref('')
 
-const similarAnimeIds = ref([])
-const similarAnimeSimilarities = ref([])
-const similarAnimeInfos = ref([])
+const recommendAnimeList = ref([]) // 修改为包含 id 和 series 的数组
+const recommendAnimeSimilarities = ref([])
+const recommendAnimeInfos = ref([])
 
 const onIdInputChanged = debounce(async () => {
-    try {
-        isLoadingInfo.value = true
-        curAnimeInfoIndex = 0
-        similarAnimeIds.value = []
-        similarAnimeInfos.value = []
+  try {
+    isLoadingInfo.value = true
+    curAnimeInfoIndex = 0
+    recommendAnimeList.value = []
+    recommendAnimeInfos.value = []
 
-        const userInfo = await getUserInfo(userName.value)
-        userId.value = userInfo.id
-        userNickname.value = userInfo.nickname
+    const userInfo = await getUserInfo(userName.value)
+    userId.value = userInfo.id
+    userNickname.value = userInfo.nickname
 
-        similarAnimeIds.value = await getUserRecommendation(userId.value)
+    recommendAnimeList.value = await getUserRecommendation(userId.value) // 获取包含 id 和 series 的数据
 
-        await getTwentyAnimeInfos()
+    await getTwentyAnimeInfos()
 
-        isLoadingInfo.value = false
-    } catch (error) {
-        notify.error({
-            title: error.message,
-            duration: 3000
-        })
+    isLoadingInfo.value = false
+  } catch (error) {
+    notify.error({
+      title: error.message,
+      duration: 3000
+    })
 
-        curAnimeInfoIndex = 0
-        similarAnimeIds.value = []
-        similarAnimeInfos.value = []
-        isLoadingInfo.value = false
-    }
+    curAnimeInfoIndex = 0
+    recommendAnimeList.value = []
+    recommendAnimeInfos.value = []
+    isLoadingInfo.value = false
+  }
 }, 500)
 
 let curAnimeInfoIndex = 0;
 const getTwentyAnimeInfos = async () => {
-    if (curAnimeInfoIndex >= similarAnimeIds.value.length) {
-        return;
-    }
+  if (curAnimeInfoIndex >= recommendAnimeList.value.length) {
+    return;
+  }
 
-    similarAnimeInfos.value = similarAnimeInfos.value.filter(item => Object.keys(item).length > 0);
+  recommendAnimeInfos.value = recommendAnimeInfos.value.filter(item => Object.keys(item).length > 0);
 
-    const nextIds = similarAnimeIds.value.slice(curAnimeInfoIndex, curAnimeInfoIndex + 20);
-    const newAnimeInfos = await Promise.all(nextIds.map(id => getAnimeInfo(id)));
+  const nextItems = recommendAnimeList.value.slice(curAnimeInfoIndex, curAnimeInfoIndex + 20);
+  const nextIds = nextItems.map(item => item.id); // 提取 id 列表
+  const newAnimeInfos = await Promise.all(nextIds.map(id => getAnimeInfo(id)));
 
-    newAnimeInfos.forEach((info, i) => {
-        info.similarity = similarAnimeSimilarities.value[curAnimeInfoIndex + i];
-    });
+  newAnimeInfos.forEach((info, i) => {
+    info.similarity = recommendAnimeSimilarities.value[curAnimeInfoIndex + i];
+    info.series = nextItems[i].series; // 添加 series 信息
+  });
 
-    const updatedList = [...similarAnimeInfos.value, ...newAnimeInfos];
+  const updatedList = [...recommendAnimeInfos.value, ...newAnimeInfos];
 
-    curAnimeInfoIndex += 20;
+  curAnimeInfoIndex += 20;
 
-    if (curAnimeInfoIndex < similarAnimeIds.value.length) {
-        updatedList.push({});
-    }
+  if (curAnimeInfoIndex < recommendAnimeList.value.length) {
+    updatedList.push({});
+  }
 
-    similarAnimeInfos.value = updatedList;
+  recommendAnimeInfos.value = updatedList;
 }
 
 watch(userName, () => {
-    onIdInputChanged()
+  onIdInputChanged()
 })
 
 const emptyAnimeList = Array.from({ length: 20 }, () => ({}));
@@ -107,7 +109,7 @@ const emptyAnimeList = Array.from({ length: 20 }, () => ({}));
                         :height="36 * mobileScaleRatio" />
                     <span>的个性化推荐动画</span>
                 </template>
-                <template v-else-if="similarAnimeInfos.length >= 1">
+                <template v-else-if="recommendAnimeInfos.length >= 1">
                     <span class="user-nickname">{{ userNickname }}</span>
                     <span>的个性化推荐动画</span>
                 </template>
@@ -117,7 +119,7 @@ const emptyAnimeList = Array.from({ length: 20 }, () => ({}));
 
         <n-infinite-scroll :distance="10" @load="getTwentyAnimeInfos">
             <n-flex class="rec-anime-info-container" justify="center" :size="12">
-                <div v-for="(anime, index) in isLoadingInfo ? emptyAnimeList : similarAnimeInfos" :key="index">
+                <div v-for="(anime, index) in isLoadingInfo ? emptyAnimeList : recommendAnimeInfos" :key="index">
                     <Anime :info="anime" :similarity="false" />
                 </div>
             </n-flex>

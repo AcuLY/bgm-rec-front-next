@@ -32,10 +32,14 @@ app.get(API_ANIME_SIM, async (req, res) => {
     const data = await collection.findOne({ anime_id: parseInt(id) });
 
     if (data) {
-      // Extract `id` and `score` from the new data format
+      // Extract `id`, `score`, and `series`
       const results = data.similar_animes.map((item) => ({
         id: item.id.valueOf(),
-        score: item.score
+        score: item.score,
+        series: Array.isArray(item.series) ? item.series.map(seriesItem => ({
+          id: seriesItem.id.valueOf(),
+          score: seriesItem.score
+        })) : []
       }));
       res.status(200).json(results);
     } else {
@@ -55,8 +59,14 @@ app.get(API_USER_REC, async (req, res) => {
     const data = await collection.findOne({ user_id: parseInt(id) });
 
     if (data) {
-      const ids = data.rec_animes.map((item) => item.valueOf());
-      res.status(200).json(ids);
+      const results = data.recommendations.map((item) => ({
+        id: item.id.valueOf(),
+        series: Array.isArray(item.series) ? item.series.map(seriesItem => ({
+          id: seriesItem.id.valueOf(),
+          score: seriesItem.score
+        })) : []
+      }));
+      res.status(200).json(results);
     } else {
       res.status(404).send('No data found');
     }
