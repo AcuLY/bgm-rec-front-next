@@ -31,9 +31,9 @@ const onIdInputChanged = debounce(async () => {
         recommendationAnimeIds.value = []
         recommendationAnimeInfos.value = []
 
-        const userInfo = await getUserInfo(userName.value)
-        userId.value = userInfo.id
-        userNickname.value = userInfo.nickname
+    const userInfo = await getUserInfo(userName.value)
+    userId.value = userInfo.id
+    userNickname.value = userInfo.nickname
 
         const [collectionsResp, recommendations] = await Promise.all([
             fetchUserCollections(userName.value),
@@ -44,14 +44,14 @@ const onIdInputChanged = debounce(async () => {
         recommendationAnimeIds.value = recommendations
         recommendationAnimeIds.value = recommendationAnimeIds.value.map(item => item.id)    // 暂时未处理同系列
 
-        await getTwentyAnimeInfos()
+    await getTwentyAnimeInfos()
 
-        isLoadingInfo.value = false
-    } catch (error) {
-        notify.error({
-            title: error.message,
-            duration: 3000
-        })
+    isLoadingInfo.value = false
+  } catch (error) {
+    notify.error({
+      title: error.message,
+      duration: 3000
+    })
 
         curAnimeInfoIndex = 0
         recommendationAnimeIds.value = []
@@ -93,7 +93,7 @@ const getTwentyAnimeInfos = async () => {
 
 
 watch(userName, () => {
-    onIdInputChanged()
+  onIdInputChanged()
 })
 
 const emptyAnimeList = Array.from({ length: 20 }, () => ({}))
