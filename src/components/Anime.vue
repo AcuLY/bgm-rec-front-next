@@ -18,7 +18,7 @@ const nameCNFontSize = computed(() => getOptimalFontSize(props.info?.nameCN, 260
 
 const openSubjectPage = () => {
     if (props.info) {
-        window.open(BANGUMI_SUBJECT(props.info.id) , '_blank')
+        window.open(BANGUMI_SUBJECT(props.info.id), '_blank')
     }
 }
 </script>
@@ -52,7 +52,7 @@ const openSubjectPage = () => {
                         <n-skeleton style="border-radius: 6px;" :height="52 * mobileScaleRatio" />
                     </template>
 
-                    <template v-if="props.info?.nameCN">
+                    <template v-if="'nameCN' in props.info">
                         <span :style="{ fontSize: nameCNFontSize }" class="name-cn">{{ props.info.nameCN }}</span>
                     </template>
                     <template v-else>
@@ -61,8 +61,18 @@ const openSubjectPage = () => {
                 </div>
 
                 <n-flex vertical>
+                    <n-flex v-show="props.info?.wish" align="center" size="small">
+                        <svg t="1746279587828" class="icon" viewBox="0 0 1024 1024" version="1.1"
+                            xmlns="http://www.w3.org/2000/svg" p-id="2791" width="24" height="24">
+                            <path
+                                d="M512.042667 193.237333a255.914667 255.914667 0 0 1 351.658666 9.728 256 256 0 0 1 10.069334 351.402667l-361.813334 362.325333-361.728-362.325333a256 256 0 0 1 361.813334-361.130667z"
+                                fill="#ec5676" p-id="2792"></path>
+                        </svg>
+                        <span style="font-size: medium;">已标记为 “想看”</span>
+                    </n-flex>
+
                     <n-flex class="date">
-                        <template v-if="props.info?.date">
+                        <template v-if="'date' in props.info">
                             <span class="date">{{ props.info.date }}</span>
                         </template>
                         <template v-else>
@@ -71,7 +81,7 @@ const openSubjectPage = () => {
                         </template>
                     </n-flex>
 
-                    <template v-if="props.info?.tags">
+                    <template v-if="'tags' in props.info">
                         <n-flex size="small">
                             <div class="tag" v-for="(tag, index) in props.info.tags" :key="index">
                                 {{ tag }}
@@ -96,7 +106,7 @@ const openSubjectPage = () => {
         </n-flex>
 
         <div class="summary-container">
-            <template v-if="props.info?.summary">
+            <template v-if="'summary' in props.info">
                 {{ props.info.summary }}
             </template>
             <template v-else>

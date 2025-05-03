@@ -25,7 +25,11 @@ watch(() => store.state.isDarkMode, (newValue) => {
     <n-config-provider :theme="currentTheme" :theme-overrides="currentThemeOverride" :locale="zhCN">
         <n-notification-provider>
             <Header />
-            <router-view />
+            <router-view v-slot="{ Component }">
+                <keep-alive include="SimilarAnime,Recommendation,About">
+                    <component :is="Component" />
+                </keep-alive>
+            </router-view>
         </n-notification-provider>
     </n-config-provider>
 </template>

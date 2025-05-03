@@ -1,11 +1,12 @@
 import axios from "axios";
+import pLimit from 'p-limit'
 import { BANGUMI_SEARCH_API, BANGUMI_SUBJECT_API } from "./_prefix";
 import { BANGUMI_USER_API, BANGUMI_USER_COLLECTION } from "../../config/api.js";
 
 
 const CACHE_EXPIRY = 24 * 60 * 60 * 1000; // 24 hours in milliseconds
 
-export const searchAnimeByKeyword = async(keyword, start=0) => {
+export const searchAnimeByKeyword = async (keyword, start = 0) => {
     try {
         const resp = await axios.get(BANGUMI_SEARCH_API(keyword), {
             params: {
@@ -22,11 +23,14 @@ export const searchAnimeByKeyword = async(keyword, start=0) => {
     }
 }
 
-export const getAnimeInfo = async(id) => {
+export const getAnimeInfo = async (id) => {
     try {
         const url = BANGUMI_SUBJECT_API(String(id))
         const resp = await axios.get(url)
         const data = resp.data
+        if (data.type != 2) {
+            throw new Error("该条目不是动画")
+        }
         return {
             id: String(id),
             name: data.name,
@@ -35,6 +39,7 @@ export const getAnimeInfo = async(id) => {
             tags: data.meta_tags,
             summary: data.summary,
             score: data.rating['score'],
+            rank: data.rating['rank'],
             total: data.rating['total'],
             date: data.date
         }
@@ -43,7 +48,7 @@ export const getAnimeInfo = async(id) => {
     }
 }
 
-export const getUserInfo = async(username) => {
+export const getUserInfo = async (username) => {
     try {
         const url = BANGUMI_USER_API(username)
         const resp = await axios.get(url)
@@ -53,6 +58,9 @@ export const getUserInfo = async(username) => {
             nickname: data.nickname
         }
     } catch (error) {
+        if (error.response?.status === 404) {
+            throw new Error('请输入正确的用户名')
+        }
         throw new Error('获取用户信息失败：' + error.message);
     }
 }
@@ -74,9 +82,9 @@ export const fetchUserCollections = async (fetchId, fetchType = 0) => {
 
         const collectionTypes = fetchType === 0 ? [1, 2, 3, 4, 5] : [fetchType];
         const collectionTypeLabels = {
-            1: "doing",
+            1: "wish",
             2: "collect",
-            3: "wish",
+            3: "doing",
             4: "onhold",
             5: "dropped",
         };
@@ -90,7 +98,7 @@ export const fetchUserCollections = async (fetchId, fetchType = 0) => {
 
         for (const collectionType of collectionTypes) {
             let offset = 0;
-            const limit = 40;
+            const limit = 50;
             let hasMore = true;
 
             while (hasMore) {
@@ -99,26 +107,17 @@ export const fetchUserCollections = async (fetchId, fetchType = 0) => {
                 url.searchParams.append("limit", limit.toString());
                 url.searchParams.append("offset", offset.toString());
 
-                const response = await axios.get(url.toString(), {
-                    headers: {
-                        "User-Agent": "bgm-rec-next/1.0",
-                    },
-                });
+                const response = await axios.get(url.toString());
 
                 if (response.status !== 200) {
                     throw new Error(`HTTP ${response.status}`);
                 }
 
                 const json = response.data;
-                const labeledData = json.data.map((item) => ({
-                    ...item,
-                    collectionTypeLabel: collectionTypeLabels[collectionType],
-                }));
 
-                groupedData[collectionTypeLabels[collectionType]] = [
-                    ...groupedData[collectionTypeLabels[collectionType]],
-                    ...labeledData,
-                ];
+                const labeledData = json.data.map((item) => item.subject_id);
+
+                groupedData[collectionTypeLabels[collectionType]].push(...labeledData);
 
                 hasMore = json.data.length >= limit;
                 offset += limit;
