@@ -31,6 +31,14 @@ export const nordTheme = {
     Divider: {
         color: getCssVar('--nord4'),
         textColor: getCssVar('--nord3'),
+    },
+    Tabs: {
+        fontWeight: 'bold',
+        textColor: getCssVar('--nord1'),
+        colorSegment: getCssVar('--nord5')
+    },
+    Radio: {
+        buttonTextColor: getCssVar('--nord3'),
     }
 };
 

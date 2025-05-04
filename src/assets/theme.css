@@ -7,6 +7,11 @@
     --color-hint: #979797;
 
     --color-tertiary-text: #6f7d97;
+
+    --color-chart-background: #F2F4F8;
+
+    --color-tag-background: #abdae1;
+    --color-tag-background-hover: #c7e1e5;
 }
 
 .dark {
@@ -16,4 +21,9 @@
     --color-hint: #ababab;
 
     --color-tertiary-text: #bdc7da;
+
+    --color-chart-background: var(--nord0);
+
+    --color-tag-background: #657f8b;
+    --color-tag-background-hover: #405964;
 }

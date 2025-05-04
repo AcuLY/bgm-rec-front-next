@@ -20,6 +20,12 @@ const routes = [
                 meta: { title: '个性推荐' }
             },
             {
+                path: 'distribution',
+                name: 'Distribution',
+                component: () => import('../views/Distribution.vue'),
+                meta: { title: '动画分布' }
+            },
+            {
                 path: 'about',
                 name: 'About',
                 component: () => import('../views/About.vue'),

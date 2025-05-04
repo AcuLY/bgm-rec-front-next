@@ -1,13 +1,12 @@
 <script setup>
 import { ref, watch } from 'vue'
+import { useStore } from 'vuex'
 
 const props = defineProps(['userName', 'isLoading'])
 const emit = defineEmits(['update:userName'])
 
-const windowWidth = ref(window.innerWidth)
-onMounted(() => { window.addEventListener('resize', () => { windowWidth.value = window.innerWidth }) })
-const isMobile = computed(() => windowWidth.value <= 768)
-const mobileScaleRatio = computed(() => isMobile.value ? 0.787 : 1)
+const store = useStore()
+const mobileScaleRatio = computed(() => store.state.isMobile ? 0.787 : 1)
 
 const userName = ref('')
 
@@ -36,7 +35,6 @@ watch(userName, () => {
 
 <style scoped>
 .outer-container {
-    width: 100vw;
     margin: 20px 0 0px 0;
     box-sizing: border-box;
     padding: 0 20px 0 20px;
@@ -50,6 +48,7 @@ watch(userName, () => {
 }
 
 .input-title {
+    color: var(--color-titlebar);
     font-size: 20px;
     font-weight: bold;
 }
@@ -77,7 +76,6 @@ watch(userName, () => {
 
 @media (max-width: 768px) {
     .outer-container {
-        width: 100vw;
         margin: 15px 0 0px 0;
         padding: 0 15px 0 15px;
     }

@@ -7,14 +7,14 @@ import Anime from '../components/Anime.vue'
 import { useNotification } from 'naive-ui'
 import { BANGUMI_SUBJECT } from '../api/_prefix'
 import InputAnime from '../components/InputAnime.vue'
+import { useStore } from 'vuex'
 
 const isLoadingInfo = ref(false)
 
 const notify = useNotification()
-const windowWidth = ref(window.innerWidth)
-onMounted(() => { window.addEventListener('resize', () => { windowWidth.value = window.innerWidth }) })
-const isMobile = computed(() => windowWidth.value <= 768)
-const mobileScaleRatio = computed(() => isMobile.value ? 0.787 : 1)
+
+const store = useStore()
+const mobileScaleRatio = computed(() => store.state.isMobile ? 0.787 : 1)
 
 const animeId = ref('')
 const animeName = ref('')

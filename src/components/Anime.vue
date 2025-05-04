@@ -2,16 +2,18 @@
 import { getOptimalFontSize } from '../utils/util';
 import { computed } from 'vue';
 import { BANGUMI_SUBJECT } from '../api/_prefix';
+import { useStore } from 'vuex';
 
 const props = defineProps({
     info: Object,
     similarity: Boolean
 })
 
+const store = useStore()
+
 const windowWidth = ref(window.innerWidth)
 onMounted(() => { window.addEventListener('resize', () => { windowWidth.value = window.innerWidth }) })
-const isMobile = computed(() => windowWidth.value <= 768)
-const mobileScaleRatio = computed(() => isMobile.value ? 0.787 : 1)
+const mobileScaleRatio = computed(() => store.state.isMobile ? 0.787 : 1)
 
 const nameFontSize = computed(() => getOptimalFontSize(props.info?.name, 260 * mobileScaleRatio.value, 52 * mobileScaleRatio.value, "bold"))
 const nameCNFontSize = computed(() => getOptimalFontSize(props.info?.nameCN, 260 * mobileScaleRatio.value, 32 * mobileScaleRatio.value, "medium"))
@@ -61,16 +63,16 @@ const openSubjectPage = () => {
                 </div>
 
                 <n-flex vertical>
-                    <n-flex v-show="props.info?.wish" align="center" size="small">
+                    <n-flex class="wish" v-show="props.info?.wish" align="center" size="small">
                         <svg t="1746279587828" class="icon" viewBox="0 0 1024 1024" version="1.1"
                             xmlns="http://www.w3.org/2000/svg" p-id="2791" width="24" height="24">
                             <path
                                 d="M512.042667 193.237333a255.914667 255.914667 0 0 1 351.658666 9.728 256 256 0 0 1 10.069334 351.402667l-361.813334 362.325333-361.728-362.325333a256 256 0 0 1 361.813334-361.130667z"
                                 fill="#ec5676" p-id="2792"></path>
                         </svg>
-                        <span style="font-size: medium;">已标记为 “想看”</span>
+                        <span >已标记为 “想看”</span>
                     </n-flex>
-
+                    
                     <n-flex class="date">
                         <template v-if="'date' in props.info">
                             <span class="date">{{ props.info.date }}</span>
@@ -218,6 +220,11 @@ const openSubjectPage = () => {
 }
 
 .tag {
+    font-size: 16px;
+    color: var(--color-tertiary-text);
+}
+
+.wish {
     font-size: 16px;
     color: var(--color-tertiary-text);
 }

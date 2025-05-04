@@ -110,6 +110,9 @@ export const fetchUserCollections = async (fetchId, fetchType = 0) => {
                 const response = await axios.get(url.toString());
 
                 if (response.status !== 200) {
+                    if (response.status === 404) {
+                        throw new Error('请输入正确的用户名')
+                    }
                     throw new Error(`HTTP ${response.status}`);
                 }
 

@@ -1,4 +1,5 @@
 <script setup>
+import { useStore } from 'vuex';
 import '../assets/theme'
 
 const props = defineProps({
@@ -7,14 +8,13 @@ const props = defineProps({
     image: String,
 })
 
-const windowWidth = ref(window.innerWidth)
-onMounted(() => { window.addEventListener('resize', () => { windowWidth.value = window.innerWidth }) })
-const isMobile = computed(() => windowWidth.value <= 768)
+const store = useStore()
 </script>
 
 <template>
     <div class="anime-compact-container">
-        <n-image :width="isMobile ? 100 : 150" :src="props.image === '' ? '/no-image.png' : props.image" fallback-src="/no-image.png" />
+        <n-image :width="store.state.isMobile ? 100 : 150" :src="props.image === '' ? '/no-image.png' : props.image"
+            fallback-src="/no-image.png" preview-disabled />
         <div class="shade"></div>
         <n-flex class="anime-names-container" vertical>
             <span class="name-cn" v-show="props.nameCN != props.name">{{ props.nameCN }}</span>

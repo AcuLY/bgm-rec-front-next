@@ -37,7 +37,7 @@ const route = useRoute()
 const menuOptions = ref([
     { name: '相似动画', path: '/similar-anime' },
     { name: '个性推荐', path: '/recommendation' },
-    { name: '统计信息', path: '/statistics' },
+    { name: '动画分布', path: '/distribution' },
     { name: '关于本站', path: '/about' },
 ])
 const activePath = computed(() => route.path);
@@ -47,9 +47,15 @@ const navigateTo = (path) => {
 };
 
 const windowWidth = ref(window.innerWidth)
-onMounted(() => { window.addEventListener('resize', () => { windowWidth.value = window.innerWidth }) })
-
+onMounted(() => {
+    window.addEventListener('resize', () => {
+        windowWidth.value = window.innerWidth
+    })
+})
 const isMobile = computed(() => windowWidth.value <= 768)
+watch(isMobile, (val) => {
+    store.dispatch('switchIsMobile', val)
+}, { immediate: true })
 
 const menuOptionsGap = computed(() => {
     return isMobile.value ? 24 : 32

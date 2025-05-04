@@ -5,11 +5,13 @@ import { searchAnimeByKeyword } from '../api/bangumi'
 import { BANGUMI_SUBJECT } from '../api/_prefix'
 import { useNotification } from 'naive-ui'
 import { debounce } from 'lodash'
+import { useStore } from 'vuex'
 
 const props = defineProps(['animeId', 'isLoading'])
 const emit = defineEmits(['update:animeId'])
 
 const notify = useNotification()
+const store = useStore()
 
 const animeId = ref('')
 watch(animeId, () => {
@@ -46,7 +48,6 @@ watch(animeKeyword, () => {
 
 const fillIdBySearchResult = (id) => {
     animeId.value = String(id)
-    showSearchResult.value = false
 }
 </script>
 
@@ -56,7 +57,7 @@ const fillIdBySearchResult = (id) => {
             <span class="input-title">动画名称</span>
             <n-input class="input" :loading="props.isLoading || isLoadingSearch" v-model:value="animeKeyword"
                 placeholder="输入关键字搜索（中文或日文）" />
-            <n-switch v-model:value="showSearchResult" size="large" style="transform: translateY(4px);">
+            <n-switch class="switch" v-model:value="showSearchResult" :size="store.state.isMobile ? 'medium' : 'large'">
                 <template #checked><span style="font-weight: bold;">显示搜索结果</span></template>
                 <template #unchecked><span style="font-weight: bold;">显示搜索结果</span></template>
             </n-switch>
@@ -98,8 +99,13 @@ const fillIdBySearchResult = (id) => {
 }
 
 .input-title {
+    color: var(--color-titlebar);
     font-size: 20px;
     font-weight: bold;
+}
+
+.switch {
+    transform: translateY(4px);
 }
 
 .search-by-name-container {
@@ -108,7 +114,6 @@ const fillIdBySearchResult = (id) => {
 }
 
 .search-result-container {
-    width: 90vw;
     height: 480px;
     padding: 12px;
     overflow-y: scroll;
@@ -116,7 +121,6 @@ const fillIdBySearchResult = (id) => {
 
 @media (max-width: 768px) {
     .outer-container {
-        width: 100vw;
         margin: 15px 0 0px 0;
         padding: 0 15px 0 15px;
     }
@@ -129,6 +133,10 @@ const fillIdBySearchResult = (id) => {
     .input-title {
         transform: translateY(2px);
         font-size: 16px;
+    }
+
+    .switch {
+        transform: translateY(-1px);
     }
 
     .search-result-container {
