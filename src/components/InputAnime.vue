@@ -48,6 +48,7 @@ watch(animeKeyword, () => {
 
 const fillIdBySearchResult = (id) => {
     animeId.value = String(id)
+    showSearchResult.value = false
 }
 </script>
 
@@ -114,7 +115,7 @@ const fillIdBySearchResult = (id) => {
 }
 
 .search-result-container {
-    height: 480px;
+    max-height: 480px;
     padding: 12px;
     overflow-y: scroll;
 }
@@ -140,7 +141,7 @@ const fillIdBySearchResult = (id) => {
     }
 
     .search-result-container {
-        height: 378px;
+        max-height: 378px;
         padding: 0;
     }
 }

@@ -22,7 +22,7 @@ export const getUserRecommendation = async (id) => {
         return resp.data
     } catch (error) {
         if (error.response && error.response.status == '404') {
-            throw new Error('找不到该用户或暂无推荐')
+            throw new Error('找不到该用户或用户收藏太少（小于 100）暂无推荐')
         }
         throw error 
     }

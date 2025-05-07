@@ -83,13 +83,14 @@ const collectionInputPoints = ref([])
 const onUserIdInputChanged = debounce(async () => {
     try {
         isLoading.value = true
+        isDataReady.value = false
+        collectionInputPoints.value = []
 
         const userCollectionIdsByGroup = (await fetchUserCollections(userId.value)).data
 
         const allIds = [
             ...userCollectionIdsByGroup.doing,
             ...userCollectionIdsByGroup.collect,
-            ...userCollectionIdsByGroup.wish,
             ...userCollectionIdsByGroup.onhold,
             ...userCollectionIdsByGroup.dropped,
         ]
@@ -115,12 +116,14 @@ const onUserIdInputChanged = debounce(async () => {
 
         collectionInputPoints.value = result
         isLoading.value = false
+        isDataReady.value = true
     } catch (error) {
         notify.error({
             title: error.message,
             duration: 3000
         })
         isLoading.value = false
+        isDataReady.value = true
     }
 }, 1000)
 

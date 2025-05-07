@@ -44,4 +44,9 @@ const router = createRouter({
     routes
 })
 
+router.afterEach((to) => {
+    const defaultTitle = 'Bangumi Match';
+    document.title = to.meta.title || defaultTitle;
+});
+
 export default router 

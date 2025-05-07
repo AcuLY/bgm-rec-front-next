@@ -26,7 +26,7 @@ watch(() => store.state.isDarkMode, (newValue) => {
         <n-notification-provider>
             <Header />
             <router-view v-slot="{ Component }">
-                <keep-alive include="SimilarAnime,Recommendation, Distribution,About">
+                <keep-alive :include="['SimilarAnime', 'Recommendation', 'Distribution', 'About']">
                     <component :is="Component" />
                 </keep-alive>
             </router-view>

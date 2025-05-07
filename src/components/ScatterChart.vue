@@ -27,8 +27,8 @@ const minScore = 4
 const maxScore = 8.5
 const scoreRange = ref([0, 10])
 
-const minTotal = 200
-const maxTotal = 15000
+const minTotal = 50
+const maxTotal = 8000
 const totalRange = ref([2500, 20000])
 
 const minTime = new Date('2000-01-01').getTime()
@@ -76,8 +76,13 @@ const colorRangeBackground = ['hsla(200, 0%, 90%, 0.8)', 'hsla(210, 0%, 70%, 0.8
 const colorRangeDefault = ['hsla(200, 10%, 85%, 1)', 'hsla(210, 80%, 80%, 1)', 'hsla(330, 80%, 60%, 1)']
 const colorRange = computed(() => props.pointSource == 'default' ? colorRangeDefault : colorRangeBackground)
 
-const openSubjectPage = (id) => {
-    window.open(BANGUMI_SUBJECT(id), '_blank')
+const clickedTag = ref(null)
+const onClickTag = (id) => {
+    if (!store.state.isMobile || id == clickedTag.value) {
+        window.open(BANGUMI_SUBJECT(id), '_blank')
+    } else {
+        clickedTag.value = id
+    }
 }
 const clearInput = () => {
     if (props.pointSource == 'custom') {
@@ -89,7 +94,7 @@ const clearInput = () => {
 
 
 const width = store.state.isMobile ? 320 : 800, height = store.state.isMobile ? 518 : 520
-const margin = { left: store.state.isMobile ? 28 : 40, right: 0, top: 0, bottom: store.state.isMobile ? 22 : 40 }
+const margin = { left: store.state.isMobile ? 32 : 40, right: 0, top: 0, bottom: store.state.isMobile ? 24 : 30 }
 const baseRadius = 5
 
 const highlightId = ref(null)
@@ -328,7 +333,7 @@ onMounted(async () => {
     function clearTooltip() {
         tooltip
             .style("display", "none")
-            .html("") // 可选，清除内容
+            .html("")
     }
 
 
@@ -439,7 +444,7 @@ onMounted(async () => {
             <n-button type="primary" v-show="inputPoints.length > 0" @click="clearInput()">清空</n-button>
             <n-tag class="tag" v-for="(anime, index) in inputPoints" :key="anime.id" closable
                 @close="inputPoints.splice(index, 1)" size="large" round @mouseenter="highlightId = anime.id;"
-                @mouseleave="highlightId = null" @click="openSubjectPage(anime.id)">
+                @mouseleave="highlightId = null" @click="onClickTag(anime.id)">
                 {{ anime.nameCN ? anime.nameCN : anime.name }}
             </n-tag>
         </n-flex>
@@ -498,7 +503,7 @@ onMounted(async () => {
     background: rgba(34, 34, 34, 0.784);
     color: #fff;
     padding: 8px 16px;
-    font-size: 14px;
+    font-size: 14px !important;
     border-radius: 8px;
     pointer-events: none;
     white-space: nowrap;
@@ -513,6 +518,17 @@ onMounted(async () => {
     white-space: nowrap;
     font-weight: bold;
     font-size: large;
+}
+
+@media (max-width: 768px) {
+    .d3-tooltip {
+        padding: 6px 12px !important;
+        font-size: 11px !important;
+    }
+
+    .tooltip-name {
+        font-size: 12px;
+    }
 }
 </style>
 
@@ -598,7 +614,7 @@ onMounted(async () => {
     }
 
     .tag {
-        font-size:12px;
+        font-size: 12px;
     }
 
     .divider {

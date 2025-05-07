@@ -96,34 +96,36 @@ export const fetchUserCollections = async (fetchId, fetchType = 0) => {
             dropped: [],
         };
 
-        for (const collectionType of collectionTypes) {
-            let offset = 0;
-            const limit = 50;
-            let hasMore = true;
+        const limit = 50;
 
-            while (hasMore) {
+        for (const collectionType of collectionTypes) {
+            // Step 1: 请求 total
+            const baseURL = new URL(BANGUMI_USER_COLLECTION(fetchId));
+            baseURL.searchParams.append("type", collectionType.toString());
+            baseURL.searchParams.append("limit", "1");
+            baseURL.searchParams.append("offset", "0");
+
+            const totalResponse = await axios.get(baseURL.toString());
+            if (totalResponse.status !== 200) throw new Error(`初始请求失败: HTTP ${totalResponse.status}`);
+            const total = totalResponse.data.total || 0;
+
+            // Step 2: 根据 total 计算所有 offset
+            const pages = Math.ceil(total / limit);
+            const pageRequests = Array.from({ length: pages }, (_, i) => {
                 const url = new URL(BANGUMI_USER_COLLECTION(fetchId));
                 url.searchParams.append("type", collectionType.toString());
                 url.searchParams.append("limit", limit.toString());
-                url.searchParams.append("offset", offset.toString());
+                url.searchParams.append("offset", (i * limit).toString());
+                return axios.get(url.toString());
+            });
 
-                const response = await axios.get(url.toString());
-
-                if (response.status !== 200) {
-                    if (response.status === 404) {
-                        throw new Error('请输入正确的用户名')
-                    }
-                    throw new Error(`HTTP ${response.status}`);
+            // Step 3: 并发请求所有分页
+            const responses = await Promise.all(pageRequests);
+            for (const res of responses) {
+                if (res.status === 200 && Array.isArray(res.data.data)) {
+                    const labeledData = res.data.data.map(item => item.subject_id);
+                    groupedData[collectionTypeLabels[collectionType]].push(...labeledData);
                 }
-
-                const json = response.data;
-
-                const labeledData = json.data.map((item) => item.subject_id);
-
-                groupedData[collectionTypeLabels[collectionType]].push(...labeledData);
-
-                hasMore = json.data.length >= limit;
-                offset += limit;
             }
         }
 
@@ -143,3 +145,5 @@ export const fetchUserCollections = async (fetchId, fetchType = 0) => {
         throw new Error("Failed to fetch user collections: " + error.message);
     }
 };
+
+

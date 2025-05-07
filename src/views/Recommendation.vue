@@ -56,7 +56,7 @@ const onIdInputChanged = debounce(async () => {
     } catch (error) {
         notify.error({
             title: error.message,
-            duration: 3000
+            duration: 5000
         })
 
         curAnimeInfoIndex = 0
@@ -111,7 +111,9 @@ defineOptions({
 
 <template>
     <n-layout-content class="recommendation-container">
-        <InputUser v-model:userName="userName" v-model:isLoading="isLoadingInfo" />
+        <div style="width: 100vw;">
+            <InputUser v-model:userName="userName" v-model:isLoading="isLoadingInfo" />
+        </div>
 
         <n-divider>
             <n-flex class="recommendation-title-container" justify="center" size="small">
