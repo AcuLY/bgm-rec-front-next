@@ -39,6 +39,9 @@ export const nordTheme = {
     },
     Radio: {
         buttonTextColor: getCssVar('--nord3'),
+    },
+    Card: {
+        color: '#ffffff',
     }
 };
 
@@ -62,5 +65,8 @@ export const nordDarkTheme = {
     Divider: {
         color: getCssVar('--nord3'),
         textColor: getCssVar('--nord6'),
+    },
+    Card: {
+        color: getCssVar('--nord3'),
     }
 }

@@ -8,26 +8,19 @@ const store = useStore()
 
 const osThemeRef = useOsTheme()
 
-const applyDarkClass = (enabled) => {
-    document.documentElement.classList.toggle('dark', enabled)
-}
-
 onMounted(() => {
     const shouldUseDark = osThemeRef.value === 'dark'
     store.dispatch('switchDarkMode', shouldUseDark)
-    applyDarkClass(shouldUseDark)
 })
 
 watch(osThemeRef, (newTheme) => {
     const shouldUseDark = newTheme === 'dark'
     store.dispatch('switchDarkMode', shouldUseDark)
-    applyDarkClass(shouldUseDark)
 })
 
 const switchMode = () => {
     const toggled = !store.state.isDarkMode
     store.dispatch('switchDarkMode', toggled)
-    applyDarkClass(toggled)
 }
 
 
@@ -64,9 +57,9 @@ const menuOptionsGap = computed(() => {
 </script>
 
 <template>
-    <n-layout-header>
+    <n-layout-header v-show="activePath !== '/'">
         <n-flex justify="space-between" class="header-container">
-            <div class="title-container">
+            <div class="title-container" @click="router.push({ name: 'Home' })">
                 <n-flex>
                     <img src="/bgm-rec-star.svg" class="bm-icon">
                     <div>Bangumi Match</div>
@@ -125,11 +118,12 @@ const menuOptionsGap = computed(() => {
     color: var(--color-titlebar);
     background-color: var(--color-titlebar-background);
     border-style: solid none none none;
-    border-color: var(--nord8);
+    border-color: var(--nord9);
     border-width: 5px;
     font-size: 24px;
     font-weight: bold;
     user-select: none;
+    transition: background-color 0.3s cubic-bezier(.4, 0, .2, 1)
 }
 
 .title-container {
@@ -160,7 +154,7 @@ const menuOptionsGap = computed(() => {
 
 .menu-option:hover,
 .menu-option.active {
-    color: var(--nord8);
+    color: var(--nord9);
 }
 
 .menu-option::after {
@@ -177,7 +171,7 @@ const menuOptionsGap = computed(() => {
 
 .menu-option:hover::after,
 .menu-option.active::after {
-    color: var(--nord8);
+    color: var(--nord9);
     width: 100%;
 }
 
@@ -188,7 +182,7 @@ const menuOptionsGap = computed(() => {
 }
 
 .mode-icon:hover {
-    color: var(--nord8);
+    color: var(--nord9);
 }
 
 .header-items {
@@ -204,7 +198,7 @@ const menuOptionsGap = computed(() => {
 }
 
 .header-items:hover svg {
-    color: var(--nord8);
+    color: var(--nord9);
 }
 
 @media (max-width: 768px) {

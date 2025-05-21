@@ -1,6 +1,8 @@
 @import "./nord.css";
 
 :root {
+    --color-home-background: var(--nord5);
+
     --color-titlebar: var(--nord3);
     --color-titlebar-background: #F2F4F8;
 
@@ -15,6 +17,8 @@
 }
 
 .dark {
+    --color-home-background: var(--nord2);
+
     --color-titlebar: var(--nord6);
     --color-titlebar-background: var(--nord0);
 

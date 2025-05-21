@@ -3,10 +3,13 @@ import { createRouter, createWebHashHistory } from "vue-router";
 const routes = [
     {
         path: '/',
-        name: 'Home',
-        component: () => import('../views/Home.vue'),
-        redirect: '/similar-anime',
+        component: () => import('../layout/Layout.vue'),
         children: [
+            {
+                path: '',
+                name: 'Home',
+                component: () => import('../views/Home.vue'),
+            },
             {
                 path: 'similar-anime',
                 name: 'SimilarAnime',
