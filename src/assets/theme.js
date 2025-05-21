@@ -42,7 +42,8 @@ export const nordTheme = {
     },
     Card: {
         color: '#ffffff',
-    }
+        textColor: getCssVar('--nord1'),
+    },
 };
 
 export const nordDarkTheme = {
@@ -67,6 +68,7 @@ export const nordDarkTheme = {
         textColor: getCssVar('--nord6'),
     },
     Card: {
-        color: getCssVar('--nord3'),
+        color: getCssVar('--nord1'),
+        textColor: getCssVar('--nord6'),
     }
 }

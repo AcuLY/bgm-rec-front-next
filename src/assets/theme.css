@@ -14,6 +14,9 @@
 
     --color-tag-background: #abdae1;
     --color-tag-background-hover: #c7e1e5;
+
+    --color-text: var(--nord3);
+    --color-author-name: #76acd2;
 }
 
 .dark {
@@ -30,4 +33,7 @@
 
     --color-tag-background: #657f8b;
     --color-tag-background-hover: #405964;
+
+    --color-text: var(--nord6);
+    --color-author-name: #abdae1;
 }
